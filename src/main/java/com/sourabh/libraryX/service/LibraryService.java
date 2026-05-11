@@ -7,10 +7,7 @@ import com.sourabh.libraryX.repository.LibraryRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -38,7 +35,7 @@ public class LibraryService {
         );
     }
 
-    public boolean addBook(LibraryBookRequest libraryBookRequest) {
+    public LibraryBookResponse addBook(LibraryBookRequest libraryBookRequest) {
         LibraryBook libraryBook = new LibraryBook();
         libraryBook.setName(libraryBookRequest.name());
         libraryBook.setGenre(libraryBookRequest.genre());
@@ -46,27 +43,19 @@ public class LibraryService {
         libraryBook.setAuthor(libraryBookRequest.author());
         libraryBook.setQuantity(libraryBookRequest.quantity());
 
-        LibraryBook rs = libraryRepository.save(libraryBook);
-        return true;
+        return mapDto(libraryRepository.save(libraryBook));
     }
 
-    public boolean updateBook(String id,LibraryBookRequest request) {
-        boolean doesExist = libraryRepository.existsById(id);
-        if(!doesExist){
-            return false;
-        }
+    public LibraryBookResponse updateBook(String id,LibraryBookRequest request) throws Exception {
+        LibraryBook book = libraryRepository.findById(id).orElseThrow(() ->new Exception("Book not found with id :"+id));
 
-        LibraryBook updatedBook = new LibraryBook(
-                id,
-                request.name(),
-                request.author(),
-                request.genre(),
-                request.publishYear(),
-                request.quantity()
-        );
-        libraryRepository.save(updatedBook);
+        book.setName(request.name());
+        book.setGenre(request.genre());
+        book.setAuthor(request.author());
+        book.setPublishYear(request.publishYear());
+        book.setQuantity(request.quantity());
 
-        return true;
+        return mapDto(libraryRepository.save(book));
     }
 
     public boolean deleteBook(String id) {
@@ -76,5 +65,16 @@ public class LibraryService {
         }
         libraryRepository.deleteById(id);
         return true;
+    }
+
+    private LibraryBookResponse mapDto(LibraryBook book){
+        return new LibraryBookResponse(
+                book.getId(),
+                book.getName(),
+                book.getAuthor(),
+                book.getGenre(),
+                book.getPublishYear(),
+                book.getQuantity()
+        );
     }
 }

@@ -2,7 +2,6 @@ package com.sourabh.libraryX.controller;
 
 import com.sourabh.libraryX.dto.LibraryBookRequest;
 import com.sourabh.libraryX.dto.LibraryBookResponse;
-import com.sourabh.libraryX.model.LibraryBook;
 import com.sourabh.libraryX.service.LibraryService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -11,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @AllArgsConstructor
@@ -33,18 +31,18 @@ public class LibraryController {
     }
 
     @PostMapping("/books")
-    public ResponseEntity<String> addBook(@Valid @RequestBody LibraryBookRequest libraryBookRequest){
-        boolean bookAdded = libraryService.addBook(libraryBookRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Book has been added!");
+    public ResponseEntity<LibraryBookResponse> addBook(@Valid @RequestBody LibraryBookRequest libraryBookRequest){
+        LibraryBookResponse bookAdded = libraryService.addBook(libraryBookRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(bookAdded);
     }
 
     @PutMapping("/books/{id}")
-    public ResponseEntity<String> updateBook(@PathVariable String id,@Valid @RequestBody LibraryBookRequest request){
-        boolean update = libraryService.updateBook(id,request);
-        return update ? ResponseEntity.status(HttpStatus.OK).body("Book details updated successfully!") : ResponseEntity.status(HttpStatus.NOT_FOUND).body("Book not found with id:"+id);
+    public ResponseEntity<LibraryBookResponse> updateBook(@PathVariable String id,@Valid @RequestBody LibraryBookRequest request) throws Exception {
+        LibraryBookResponse update = libraryService.updateBook(id,request);
+        return ResponseEntity.status(HttpStatus.OK).body(update);
     }
 
-    @DeleteMapping("/books/remove/{id}")
+    @DeleteMapping("/books/{id}")
     public ResponseEntity<String> removeBook(@PathVariable String id){
         boolean deleted = libraryService.deleteBook(id);
         return deleted ? ResponseEntity.status(HttpStatus.NO_CONTENT).body("Book deleted!") : ResponseEntity.status(HttpStatus.NOT_FOUND).body("Book not found with id :"+id);
