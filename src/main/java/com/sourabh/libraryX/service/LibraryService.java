@@ -2,9 +2,11 @@ package com.sourabh.libraryX.service;
 
 import com.sourabh.libraryX.dto.LibraryBookRequest;
 import com.sourabh.libraryX.dto.LibraryBookResponse;
+import com.sourabh.libraryX.exception.BookNotFoundException;
 import com.sourabh.libraryX.model.LibraryBook;
 import com.sourabh.libraryX.repository.LibraryRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,8 +24,8 @@ public class LibraryService {
         return books;
     }
 
-    public LibraryBookResponse getBook(String id) throws Exception {
-        LibraryBook book = libraryRepository.findById(id).orElseThrow(() -> new Exception("Book not found!"));
+    public LibraryBookResponse getBook(String id) {
+        LibraryBook book = libraryRepository.findById(id).orElseThrow(() -> new BookNotFoundException("Book Not Found!"));
 
         return new LibraryBookResponse(
                 book.getId(),
@@ -46,8 +48,8 @@ public class LibraryService {
         return mapDto(libraryRepository.save(libraryBook));
     }
 
-    public LibraryBookResponse updateBook(String id,LibraryBookRequest request) throws Exception {
-        LibraryBook book = libraryRepository.findById(id).orElseThrow(() ->new Exception("Book not found with id :"+id));
+    public LibraryBookResponse updateBook(String id,LibraryBookRequest request) {
+        LibraryBook book = libraryRepository.findById(id).orElseThrow(() ->new BookNotFoundException("Book not found with id :"+id));
 
         book.setName(request.name());
         book.setGenre(request.genre());
@@ -58,13 +60,9 @@ public class LibraryService {
         return mapDto(libraryRepository.save(book));
     }
 
-    public boolean deleteBook(String id) {
-        boolean existsById = libraryRepository.existsById(id);
-        if(!existsById){
-            return false;
-        }
-        libraryRepository.deleteById(id);
-        return true;
+    public void deleteBook(String id) {
+        LibraryBook book = libraryRepository.findById(id).orElseThrow(() -> new BookNotFoundException("Book not found with id :"+id));
+        libraryRepository.delete(book);
     }
 
     private LibraryBookResponse mapDto(LibraryBook book){

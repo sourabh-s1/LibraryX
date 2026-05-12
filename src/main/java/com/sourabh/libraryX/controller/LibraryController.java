@@ -2,6 +2,7 @@ package com.sourabh.libraryX.controller;
 
 import com.sourabh.libraryX.dto.LibraryBookRequest;
 import com.sourabh.libraryX.dto.LibraryBookResponse;
+import com.sourabh.libraryX.exception.BookNotFoundException;
 import com.sourabh.libraryX.service.LibraryService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -25,7 +26,7 @@ public class LibraryController {
     }
 
     @GetMapping("/books/{id}")
-    public ResponseEntity<?> fetchBook(@PathVariable String id) throws Exception {
+    public ResponseEntity<LibraryBookResponse> fetchBook(@PathVariable String id) {
         LibraryBookResponse book = libraryService.getBook(id);
         return ResponseEntity.status(HttpStatus.OK).body(book);
     }
@@ -37,14 +38,14 @@ public class LibraryController {
     }
 
     @PutMapping("/books/{id}")
-    public ResponseEntity<LibraryBookResponse> updateBook(@PathVariable String id,@Valid @RequestBody LibraryBookRequest request) throws Exception {
+    public ResponseEntity<LibraryBookResponse> updateBook(@PathVariable String id,@Valid @RequestBody LibraryBookRequest request) {
         LibraryBookResponse update = libraryService.updateBook(id,request);
         return ResponseEntity.status(HttpStatus.OK).body(update);
     }
 
     @DeleteMapping("/books/{id}")
-    public ResponseEntity<String> removeBook(@PathVariable String id){
-        boolean deleted = libraryService.deleteBook(id);
-        return deleted ? ResponseEntity.status(HttpStatus.NO_CONTENT).body("Book deleted!") : ResponseEntity.status(HttpStatus.NOT_FOUND).body("Book not found with id :"+id);
+    public ResponseEntity<Void> removeBook(@PathVariable String id) throws BookNotFoundException {
+        libraryService.deleteBook(id);
+        return ResponseEntity.noContent().build();
     }
 }
