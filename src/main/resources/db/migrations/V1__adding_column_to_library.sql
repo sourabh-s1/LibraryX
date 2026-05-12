@@ -1,0 +1,1 @@
+alter table library_book add column price int;
